@@ -1,0 +1,70 @@
+version: '3'
+
+services:
+  projects:
+    build:
+      context: ./docker/projects_nginx
+      dockerfile: nginx.docker
+    volumes:
+      - ./projects:/var/www/bitrix
+      - ./storage/docker/logs/nginx/:/var/log/nginx/
+    ports:
+      - "80"
+    depends_on:
+      - projects-php-fpm
+
+  portal:
+    build:
+      context: ./docker/portal_nginx
+      dockerfile: nginx.docker
+    volumes:
+      - ./portal:/var/www/bitrix
+      - ./storage/docker/logs/nginx/:/var/log/nginx/
+    ports:
+      - "80"
+    depends_on:
+      - portal-php-fpm
+
+  projects-php-fpm:
+    build:
+      context: ./docker/php
+      dockerfile: php-fpm.docker
+    volumes:
+      - ./projects:/var/www/bitrix
+      - ./storage/docker/logs/php/:/var/log/php/
+    depends_on:
+      - projects_db
+
+  portal-php-fpm:
+    build:
+      context: ./docker/php
+      dockerfile: php-fpm.docker
+    volumes:
+      - ./portal:/var/www/bitrix
+      - ./storage/docker/logs/php/:/var/log/php/
+    depends_on:
+      - portal_db
+
+  projects_db:
+    build:
+      context: ./docker/projects_db
+      dockerfile: mysql.docker
+    environment:
+      MYSQL_DATABASE: bitrix
+      MYSQL_USER: bitrix
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: secret
+    ports:
+      - "33061:3306"
+
+  portal_db:
+    build:
+      context: ./docker/portal_db
+      dockerfile: mysql.docker
+    environment:
+      MYSQL_DATABASE: bitrix
+      MYSQL_USER: bitrix
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: secret
+    ports:
+      - "33062:3306"

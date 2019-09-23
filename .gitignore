@@ -1,0 +1,6 @@
+.idea/
+projects/*
+portal/*
+.env
+storage/
+!www/.gitkeep
